@@ -7,7 +7,7 @@ pipeline {
         // رابط المستودع الخاص بكِ بعد تعديله لاسمك
         REPO_URL = "https://github.com/Kholoudkhaled2210/jenkins-repo.git"
         // اسم مستخدم Docker Hub الخاص بكِ
-        DOCKERHUB_USER = 'Kholoudkhaled2210' 
+        DOCKERHUB_USER = 'kholoudkhaled1221' 
         IMAGE_NAME = "${DOCKERHUB_USER}/${APP_NAME}"
     }
 
