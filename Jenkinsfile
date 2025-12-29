@@ -1,30 +1,59 @@
 pipeline {
     agent any
 
+    environment {
+        // اسم الصورة التي ستظهر في Docker Hub
+        APP_NAME = 'jenkins-repo' 
+        // رابط المستودع الخاص بكِ بعد تعديله لاسمك
+        REPO_URL = "https://github.com/Kholoudkhaled2210/jenkins-repo.git"
+        // اسم مستخدم Docker Hub الخاص بكِ
+        DOCKERHUB_USER = 'kholoudkhaled1221' 
+        IMAGE_NAME = "${DOCKERHUB_USER}/${APP_NAME}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/MohamedMagdy840/jenkins-repo.git',
+                // سحب الملفات من فرع dev الخاص بكِ [cite: 4]
+                git branch: 'dev', 
+                    url: "${REPO_URL}", 
                     credentialsId: 'github'
             }
         }
 
-        stage('Run Hello World') {
+        stage('Build Docker Image') {
             steps {
-                sh 'ls -l'
-                sh 'chmod +x hello.sh'
-                sh './hello.sh'
+                script {
+                    // بناء الصورة باستخدام Dockerfile الموجود في المشروع [cite: 1, 6]
+                    sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+               
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh "docker login -u $USER -p $PASS"
+                    sh "docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
+                }
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+               
+                sh "docker run -d -p 5000:5000 --name ${APP_NAME}-dev-${BUILD_NUMBER} ${IMAGE_NAME}:${BUILD_NUMBER}"
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo ' التطبيق اشتغل تمام وتم الرفع على Docker Hub!'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo '❌ حصلت مشكلة، راجعي الـ Logs في جينكنز'
         }
     }
 }
