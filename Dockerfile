@@ -1,14 +1,13 @@
-# Use the official Python base image
 FROM python:3.9-slim
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the Python script into the container
+# إضافة هذا السطر لتثبيت مكتبة Flask
+RUN pip install flask
+
 COPY hello.py .
 
-# Expose port 5000 for the Flask app
+# تأكدي أن المنفذ هو 5000
 EXPOSE 5000
 
-# Run the Python script
 CMD ["python", "hello.py"]
